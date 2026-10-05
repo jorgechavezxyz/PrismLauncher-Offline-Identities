@@ -7,9 +7,11 @@
 </p>
 
 <p align="center">
-  Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.<br />
-  <br />This is a <b>fork</b> of the MultiMC Launcher and is <b>not</b> endorsed by it.
+  Prism Launcher Offline Identities is an unofficial fork of Prism Launcher that adds separate local identities.<br />
+  <br />It is not affiliated with or endorsed by the Prism Launcher project. Full offline play requires a saved Microsoft account that owns Minecraft.
 </p>
+
+Custom builds must set `Launcher_MSA_CLIENT_ID` to an application ID registered by the builder to enable Microsoft sign-in and ownership verification. The Imgur and CurseForge integrations are disabled unless their own API keys are configured.
 
 ## Installation
 
