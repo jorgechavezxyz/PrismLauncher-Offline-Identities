@@ -15,7 +15,10 @@ LoginWizardPage::~LoginWizardPage()
     delete ui;
 }
 
-void LoginWizardPage::initializePage() {}
+void LoginWizardPage::initializePage()
+{
+    APPLICATION->settings()->set("MSAccountSetupPromptShown", true);
+}
 
 bool LoginWizardPage::validatePage()
 {
