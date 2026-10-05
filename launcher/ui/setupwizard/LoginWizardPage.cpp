@@ -4,6 +4,7 @@
 #include "ui_LoginWizardPage.h"
 
 #include "Application.h"
+#include "settings/SettingsObject.h"
 
 LoginWizardPage::LoginWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::LoginWizardPage)
 {
