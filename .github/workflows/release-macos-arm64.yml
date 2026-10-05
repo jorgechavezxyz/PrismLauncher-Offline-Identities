@@ -1,0 +1,86 @@
+name: Build and Release macOS ARM64
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag, for example v0.1.0-alpha.1
+        type: string
+        required: true
+        default: v0.1.0-alpha.1
+
+permissions:
+  contents: write
+
+jobs:
+  build_release:
+    name: Build and release macOS ARM64
+    runs-on: macos-26
+    env:
+      ARTIFACT_NAME: macOS-arm64-Qt6
+      BUILD_PLATFORM: official
+      BUILD_TYPE: Release
+      CMAKE_PRESET: macos
+      MACOSX_DEPLOYMENT_TARGET: 13.0
+      RELEASE_VERSION: ${{ inputs.version }}
+
+    steps:
+      - name: Verify Apple Silicon runner
+        run: test "$RUNNER_ARCH" = "ARM64"
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Setup dependencies
+        id: setup-dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          artifact-name: macOS-arm64
+          qt-version: 6.11.2
+
+      - name: Configure project
+        run: |
+          cmake --preset "$CMAKE_PRESET" \
+            -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" \
+            -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
+
+      - name: Build launcher
+        run: cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+
+      - name: Verify ARM64 app binary
+        run: |
+          cmake --install build --config "$BUILD_TYPE"
+          lipo -archs install/PrismLauncher.app/Contents/MacOS/prismlauncher | grep -qw arm64
+
+      - name: Package for macOS
+        uses: ./.github/actions/package/macos
+        with:
+          version: ${{ inputs.version }}
+          build-type: ${{ env.BUILD_TYPE }}
+          artifact-name: macOS-arm64
+
+      - name: Name release assets
+        run: |
+          mv PrismLauncher.zip "PrismLauncher-macOS-arm64-${RELEASE_VERSION}.zip"
+          mv PrismLauncher.dmg "PrismLauncher-macOS-arm64-${RELEASE_VERSION}.dmg"
+
+      - name: Publish prerelease
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Prism Launcher Offline Identities ${{ inputs.version }} (macOS arm64)
+          prerelease: true
+          draft: false
+          body: |
+            Unofficial experimental macOS ARM64 packaging and UI preview of Prism Launcher Offline Identities.
+
+            Microsoft sign-in is not enabled in this build, so Minecraft ownership cannot be verified. Offline identities therefore remain in demo/trial mode. This release does not enable full-game offline play.
+
+            The macOS package is ad-hoc signed and not notarized unless Apple signing and notarization credentials are configured for this repository. macOS may require opening it from Finder using Control-click > Open.
+          files: |
+            PrismLauncher-macOS-arm64-${{ inputs.version }}.zip
+            PrismLauncher-macOS-arm64-${{ inputs.version }}.dmg
