@@ -103,7 +103,7 @@ class AccountList : public QAbstractListModel {
 
     MinecraftAccountPtr defaultAccount() const;
     void setDefaultAccount(MinecraftAccountPtr profileId);
-    bool anyAccountIsValid();
+    bool anyAccountIsValid() const;
 
     bool isActive() const;
 
